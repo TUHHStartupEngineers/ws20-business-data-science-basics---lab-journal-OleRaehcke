@@ -11,7 +11,7 @@
 
 <meta name="author" content="Joschka Schwarz" />
 
-<meta name="date" content="2020-11-17" />
+<meta name="date" content="2020-11-23" />
 
 <title>Dictionary</title>
 
@@ -417,7 +417,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Dictionary</h1>
 <h4 class="author">Joschka Schwarz</h4>
-<h4 class="date">2020-11-17</h4>
+<h4 class="date">2020-11-23</h4>
 
 </div>
 
@@ -439,11 +439,12 @@ div.tocify {
 <li><code>list.files()</code> This function lists all the names of each file in a given R project.</li>
 </ol>
 <pre class="r"><code>list.files()</code></pre>
-<pre><code>##  [1] &quot;_site.yml&quot;                 &quot;build_website.R&quot;           &quot;data_wrangling.html&quot;       &quot;data_wrangling.Rmd&quot;       
-##  [5] &quot;dictionary.Rmd&quot;            &quot;docs&quot;                      &quot;ggplot_graphs.Rmd&quot;         &quot;images&quot;                   
-##  [9] &quot;index.Rmd&quot;                 &quot;journal_files&quot;             &quot;journal.Rmd&quot;               &quot;lab_journal_website.Rproj&quot;
-## [13] &quot;links.Rmd&quot;                 &quot;machine_learning.Rmd&quot;      &quot;README.md&quot;                 &quot;site_libs&quot;                
-## [17] &quot;style.css&quot;                 &quot;testfile.rds&quot;</code></pre>
+<pre><code>##  [1] &quot;_site.yml&quot;                 &quot;00_data&quot;                   &quot;build_website.R&quot;           &quot;data_wrangling.html&quot;      
+##  [5] &quot;data_wrangling.Rmd&quot;        &quot;diamonds2.rds&quot;             &quot;dictionary.Rmd&quot;            &quot;docs&quot;                     
+##  [9] &quot;ggplot_graphs.Rmd&quot;         &quot;images&quot;                    &quot;index.Rmd&quot;                 &quot;journal.Rmd&quot;              
+## [13] &quot;journal_cache&quot;             &quot;journal_files&quot;             &quot;lab_journal_website.Rproj&quot; &quot;links.Rmd&quot;                
+## [17] &quot;machine_learning.Rmd&quot;      &quot;README.md&quot;                 &quot;site_libs&quot;                 &quot;style.css&quot;                
+## [21] &quot;testfile.rds&quot;</code></pre>
 <p>…</p>
 <hr />
 </div>
@@ -686,6 +687,10 @@ hist(x)</code></pre>
 <p>This function creates a plot graph of a given set of data.</p>
 <pre class="r"><code>x &lt;- cbind(c(1,2,3,4),c(10,20,30,40))
 plot(x)</code></pre>
+<pre><code>## Warning in num:num4: numerischer Ausdruck hat 8 Elemente: nur erstes wird genutzt
+
+## Warning in num:num4: numerischer Ausdruck hat 8 Elemente: nur erstes wird genutzt</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
 <p><img src="dictionary_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 </div>
 <div id="distributions" class="section level2">
