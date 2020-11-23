@@ -136,7 +136,6 @@ sales_by_state_tbl %>%
                                                     suffix = " €")) +
   labs(
     title    = "Revenue by State",
-    subtitle = "Upward Trend",
     x = "", # Override defaults for x and y
     y = "Revenue"
   )
@@ -189,7 +188,6 @@ plot<-function(x) {
                                                       suffix = " €")) +
     labs(
       title    = name[1],
-      subtitle = "Upward Trend",
       x = "", # Override defaults for x and y
       y = "Revenue"
     )
