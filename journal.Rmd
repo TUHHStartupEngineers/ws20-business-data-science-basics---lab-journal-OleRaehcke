@@ -12,49 +12,8 @@ output:
     #code_folding: hide
 ---
 
-```{r, eval = FALSE}
-numbers <- 1:1000
-
-# This will print the first 10 elements of the vector numbers
-numbers[1:10]
-
-# This will plot a histogram of 100 random elements of the vector numbers
-hist(sample(numbers, 100, replace = T))
-```
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(message=FALSE,warning=FALSE, cache=TRUE)
-```
-
-**IMPORTANT:** You can delete everything in here and start fresh. You might want to start by not deleting anything above this line until you know what that stuff is doing.
-
-This is an `.Rmd` file. It is plain text with special features. Any time you write just like this, it will be compiled to normal text in the website. If you put a \# in front of your text, it will create a top level-header.
-
-# My first post
-
-Last compiled: `r Sys.Date()`
-
-Notice that whatever you define as a top level header, automatically gets put into the table of contents bar on the left. 
-
-## Second level header
-
-You can add more headers by adding more hashtags. These won't be put into the table of contents
-
-### third level header
-
-Here's an even lower level header
-
-# My second post (note the order)
-
-Last compiled: `r Sys.Date()`
-
-I'm writing this tutorial going from the top down. And, this is how it will be printed. So, notice the second post is second in the list. If you want your most recent post to be at the top, then make a new post starting at the top. If you want the oldest first, do, then keep adding to the bottom
 
 # Intro to the tidyverse
-
-So far this is just a blog where you can write in plain text and serve your writing to a webpage. One of the main purposes of this lab journal is to record your progress learning R. The reason I am asking you to use this process is because you can both make a website, and a lab journal, and learn R all in R-studio. This makes everything really convenient and in the same place. 
-
-So, let's say you are learning how to make a histogram in R. For example, maybe you want to sample 100 numbers from a normal distribution with mean = 0, and standard deviation = 1, and then you want to plot a histogram. You can do this right here by using an r code block, like this:
 
 ```{r}
 library(tidyverse)
@@ -66,52 +25,44 @@ bike_orderlines_joined_tbl <- orderlines_tbl %>%
   left_join(bikes_tbl, by = c("product.id" = "bike.id")) %>%
   left_join(bikeshops_tbl, by = c("customer.id" = "bikeshop.id"))
 bike_orderlines_wrangled_tbl <- bike_orderlines_joined_tbl %>%
-  # 5.1 Separate category name
+
   separate(col    = location,
            into   = c("city", "state"),
            sep    = ", ") %>%
   
-  # 5.2 Add the total price (price * quantity) 
-  # Add a column to a tibble that uses a formula-style calculation of other columns
+  
   mutate(total.price = price * quantity) %>%
   
-  # 5.3 Optional: Reorganize. Using select to grab or remove unnecessary columns
-  # 5.3.1 by exact column name
+  
   select(-...1, -gender) %>%
   
-  # 5.3.2 by a pattern
-  # You can use the select_helpers to define patterns. 
-  # Type ?ends_with and click on Select helpers in the documentation
+ 
   select(-ends_with(".id")) %>%
   
-  # 5.3.3 Actually we need the column "order.id". Let's bind it back to the data
+  
   bind_cols(bike_orderlines_joined_tbl %>% select(order.id)) %>% 
   
-  # 5.3.4 You can reorder the data by selecting the columns in your desired order.
-  # You can use select_helpers like contains() or everything()
+  
   select(order.id, contains("order"), contains("model"), contains("category"),
          price, quantity, total.price,
          everything()) %>%
   
-  # 5.4 Rename columns because we actually wanted underscores instead of the dots
-  # (one at the time vs. multiple at once)
+  
   rename(bikeshop = name) %>%
   set_names(names(.) %>% str_replace_all("\\.", "_"))
 
 library(lubridate)
-# Step 1 - Manipulate
+
 sales_by_state_tbl <- bike_orderlines_wrangled_tbl %>%
   
-  # Select columns
+  
   select(state, total_price) %>%
   
-  # Grouping by year and summarizing sales
+  
   group_by(state) %>% 
   summarize(sales = sum(total_price)) %>%
   
-  # Optional: Add a column that turns the numbers into a currency format 
-  # (makes it in the plot optically more appealing)
-  # mutate(sales_text = scales::dollar(sales)) <- Works for dollar values
+  
   mutate(sales_text = scales::dollar(sales, big.mark = ".", 
                                      decimal.mark = ",", 
                                      prefix = "", 
@@ -119,17 +70,15 @@ sales_by_state_tbl <- bike_orderlines_wrangled_tbl %>%
 
 sales_by_state_tbl %>%
   
-  # Setup canvas with the columns year (x-axis) and sales (y-axis)
+  
   ggplot(aes(x = state, y = sales)) +
   
-  # Geometries
+  
   geom_col(fill = "#2DC6D6") + # Use geom_col for a bar plot
   geom_label(aes(label = sales_text)) + # Adding labels to the bars
   geom_smooth(method = "lm", se = FALSE) + # Adding a trendline
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  # Formatting
-  # scale_y_continuous(labels = scales::dollar) + # Change the y-axis. 
-  # Again, we have to adjust it for euro values
+  
   scale_y_continuous(labels = scales::dollar_format(big.mark = ".", 
                                                     decimal.mark = ",", 
                                                     prefix = "", 
@@ -141,20 +90,17 @@ sales_by_state_tbl %>%
   )
 
 library(lubridate)
-# Step 1 - Manipulate
+
 sales_by_state_year_tbl <- bike_orderlines_wrangled_tbl %>%
   
-  # Select columns
+  
   select(order_date,state, total_price) %>%
   mutate(year = year(order_date)) %>%
   unite(lols,state,year,sep=", ") %>%
-  # Grouping by year and summarizing sales
+  
   group_by(lols) %>% 
   summarize(sales = sum(total_price)) %>%
-  
-  # Optional: Add a column that turns the numbers into a currency format 
-  # (makes it in the plot optically more appealing)
-  # mutate(sales_text = scales::dollar(sales)) <- Works for dollar values
+
   mutate(sales_text = scales::dollar(sales, big.mark = ".", 
                                      decimal.mark = ",", 
                                      prefix = "", 
@@ -171,17 +117,14 @@ plot<-function(x) {
              sep    = ", ") 
   name<- state_sales_by_year_tbl%>%pull(state)
   state_sales_by_year_tbl%>%
-    # Setup canvas with the columns year (x-axis) and sales (y-axis)
     ggplot(aes(x = year, y = sales)) +
     
-    # Geometries
+
     geom_col(fill = "#2DC6D6") + # Use geom_col for a bar plot
     geom_label(aes(label = sales_text)) + # Adding labels to the bars
     geom_smooth(method = "lm", se = FALSE) + # Adding a trendline
     
-    # Formatting
-    # scale_y_continuous(labels = scales::dollar) + # Change the y-axis. 
-    # Again, we have to adjust it for euro values
+  
     scale_y_continuous(labels = scales::dollar_format(big.mark = ".", 
                                                       decimal.mark = ",", 
                                                       prefix = "", 
@@ -194,6 +137,9 @@ plot<-function(x) {
     )
   
 }
+```
+## Plots
+```{r}
 plot(1)
 plot(2)
 plot(3)
@@ -207,7 +153,9 @@ plot(10)
 plot(11)
 plot(12)
 ```
-#Data Acquisition
+
+# Data Acquisition
+
 ```{r}
 library(RSQLite)
 library(dplyr)
@@ -237,7 +185,7 @@ pokemon_tbl
 
 ```
 ## RoseBikeScraping
-```{r}
+```{r,eval=FALSE}
 url_home          <- "https://www.rosebikes.com"
 html_home         <- read_html(url_home)
 bike_category_tbl <- html_home %>%
@@ -322,3 +270,211 @@ bike_price_tbl
 
 
 ```
+
+# Data Wrangling
+```{r,eval=FALSE}
+library(readxl)
+library(data.table)
+library(vroom)
+
+assignee_types <- list(
+  id = col_character(),
+  type = col_character(),
+  name_first = col_skip(),
+  name_last = col_skip(),
+  organization = col_character()
+)
+
+patent_assignee_types <- list(
+  patent_id = col_character(),
+  assignee_id = col_character(),
+  location_id = col_skip()
+)
+patent_types <- list(
+  id = col_character(),
+  type = col_skip(),
+  number = col_skip(),
+  country = col_skip(),
+  date = col_date("%Y-%m-%d"),
+  abstract = col_skip(),
+  title = col_skip(),
+  kind = col_skip(),
+  num_claims = col_skip(),
+  filename = col_skip(),
+  withdrawn = col_skip()
+)
+uspc_types <- list(
+  uuid = col_skip(),
+  patent_id = col_character(),
+  mainclass_id = col_character(),
+  subclass_id = col_skip(),
+  sequence = col_character()
+)
+assignee <- vroom(
+  file       = "00_data/03_patent/assignee.tsv", 
+  delim      = "\t", 
+  col_types  = assignee_types,
+  na         = c("", "NA", "NULL")
+)
+patent_assignee <- vroom(
+  file       = "00_data/03_patent/patent_assignee.tsv", 
+  delim      = "\t", 
+  col_types  = patent_assignee_types,
+  na         = c("", "NA", "NULL")
+)
+patent <- vroom(
+  file       = "00_data/03_patent/patent.tsv", 
+  delim      = "\t", 
+  col_types  = patent_types,
+  na         = c("", "NA", "NULL")
+)
+uspc <- vroom(
+  file       = "00_data/03_patent/uspc.tsv", 
+  delim      = "\t", 
+  col_types  = uspc_types,
+  na         = c("", "NA", "NULL")
+)
+setDT(assignee)
+setDT(patent_assignee)
+setDT(patent)
+setkey(assignee,id)
+setkey(patent_assignee,assignee_id)
+setkey(patent,id)
+
+organization_patent<-assignee[patent_assignee]
+organization_sum<-organization_patent%>%
+  .[,.N,by=organization]%>%
+  .[order(-N)]
+#organization_patent2<-patent_assignee[assignee, on = c(assignee_id="id")]
+#organization_sum2<-organization_patent2[,sum(.N),by=organization]
+
+setkey(organization_patent,patent_id)
+organization_date<-organization_patent[patent]
+organization_date<-organization_date%>%
+  separate(col  = date,
+           into = c("year", "month", "day"),
+           sep  = "-", remove = FALSE)
+organization_sum2019<-organization_date[year=="2019",sum(.N),by=organization]
+Top10_2019<-organization_sum2019%>%.[order(-V1)]%>%.[organization!=is.na(organization)]%>%
+  .[1:10]
+
+setDT(uspc)
+setkey(uspc,patent_id)
+organization_uspc<-organization_patent[uspc]
+Top10<-organization_sum%>%.[order(-N)]%>%.[organization!=is.na(organization)]%>%
+  .[1:10]
+setkey(Top10,organization)
+setkey(organization_uspc,organization)
+Top10_uspc<-organization_uspc[Top10]
+Top10_uspc_sum<-Top10_uspc%>%
+  .[sequence==0,.N,by=.(mainclass_id)]%>%
+  .[order(-N)]
+```
+## Question One
+```{r}
+Top10
+```
+## Question Two
+```{r}
+Top10_2019
+```
+## Question Three
+```{r}
+Top10_uspc_sum
+```
+
+
+
+
+# Data Visualization
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(scales)
+library(ggrepel)
+covid_data_tbl <- read_csv("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv")
+data_ger<-covid_data_tbl%>%
+  filter(countriesAndTerritories=="Germany"|countriesAndTerritories=="United_States_of_America"|countriesAndTerritories=="Spain"|countriesAndTerritories=="France"|countriesAndTerritories=="United_Kingdom")%>%
+  mutate(date=dmy(dateRep))%>%
+  arrange(date)%>%
+  group_by(countriesAndTerritories)%>%
+  mutate(cases_sum=cumsum(cases))%>%
+  ungroup()
+
+data<-tail(data_ger,1)
+data_ger %>%
+  
+  # Canvas
+  ggplot(aes(x = date, y = cases_sum, color = countriesAndTerritories )) +
+  
+  # Geometries 
+  geom_line(size = 1)+
+  scale_x_date(labels = date_format("%B"), breaks='1 month')+
+  scale_y_continuous(breaks = seq(0, 15000000, by = 2500000),
+                     labels = scales::dollar_format(scale = 1/1e6, 
+                                                    prefix = "", 
+                                                    suffix = "M")) +
+  labs(
+    title = "COVID-19 confirmed cases worldwide",
+    subtitle = "As of 29-11-2020, Europe had more cases than the USA",
+    x = "Year 2020",
+    y = "Cumulative Cases"
+  )+
+  scale_color_brewer(palette = "Set1",name="Countries")+
+  geom_label_repel(inherit.aes = FALSE, 
+                   data = data,
+                   aes(x = date, y = cases_sum, label = cases_sum),
+                   nudge_x=-40)+
+  theme_light() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    title = element_text(face = "bold", color = "#08306B"),
+    legend.position="bottom"
+    
+  )+guides(color=guide_legend(nrow=2,byrow=TRUE))
+```
+
+```{r} 
+world <- map_data("world")
+
+Deaths_tbl<-covid_data_tbl%>%
+  group_by(countriesAndTerritories)%>%
+  summarise(total_deaths = sum(deaths/popData2019))%>%
+  ungroup()%>% 
+  mutate("Mortality Rate"= scales::percent(total_deaths))%>%
+  mutate(across(countriesAndTerritories, str_replace_all, "_", " ")) %>%
+  mutate(countriesAndTerritories = case_when(
+    
+    countriesAndTerritories == "United Kingdom" ~ "UK",
+    countriesAndTerritories == "United States of America" ~ "USA",
+    countriesAndTerritories == "Czechia" ~ "Czech Republic",
+    TRUE ~ countriesAndTerritories
+    
+  ))
+plot_data<-left_join(world, Deaths_tbl, by = c("region"="countriesAndTerritories"))
+
+plot_data%>% ggplot( aes(long, lat, group = group,fill = `total_deaths`))+
+  geom_map(aes(map_id=region),map = plot_data, color = "darkgrey")+
+  
+  scale_fill_gradient(low="blue", high="red",
+                      name="Mortality Rate",
+                      breaks = seq(0, 0.002, by = 0.0002),
+                      labels = scales::dollar_format(scale = 1/1e-2,
+                                                     prefix = "",
+                                                     suffix = "%"))+
+  labs(
+    title = "Confirmed COVID-19 deaths relative to the size of the population",
+    subtitle = "More than 1,2 Million COVID-19 deaths worldwiede",
+    x = "",
+    y = ""
+  )+
+  theme_light() +
+  theme(
+    title = element_text(face = "bold", color = "darkgrey"),
+    axis.text.x=element_blank(),
+    axis.text.y=element_blank()
+    
+  )
+```
+
