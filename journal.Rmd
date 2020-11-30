@@ -13,7 +13,7 @@ output:
 ---
 
 
-# Intro to the tidyverse
+# Adding R stuff
 
 ```{r}
 library(tidyverse)
@@ -131,7 +131,6 @@ plot<-function(x) {
                                                       suffix = " €")) +
     labs(
       title    = name[1],
-      subtitle = "Upward Trend",
       x = "", # Override defaults for x and y
       y = "Revenue"
     )
@@ -153,6 +152,7 @@ plot(10)
 plot(11)
 plot(12)
 ```
+<<<<<<< HEAD
 
 # Data Acquisition
 
@@ -478,3 +478,6 @@ plot_data%>% ggplot( aes(long, lat, group = group,fill = `total_deaths`))+
   )
 ```
 
+=======
+
+>>>>>>> parent of 47cb837... Comm1
