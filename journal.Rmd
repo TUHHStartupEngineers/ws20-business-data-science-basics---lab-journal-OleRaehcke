@@ -50,7 +50,7 @@ Last compiled: `r Sys.Date()`
 
 I'm writing this tutorial going from the top down. And, this is how it will be printed. So, notice the second post is second in the list. If you want your most recent post to be at the top, then make a new post starting at the top. If you want the oldest first, do, then keep adding to the bottom
 
-# Adding R stuff
+# Intro to the tidyverse
 
 So far this is just a blog where you can write in plain text and serve your writing to a webpage. One of the main purposes of this lab journal is to record your progress learning R. The reason I am asking you to use this process is because you can both make a website, and a lab journal, and learn R all in R-studio. This makes everything really convenient and in the same place. 
 
@@ -188,6 +188,7 @@ plot<-function(x) {
                                                       suffix = " €")) +
     labs(
       title    = name[1],
+      subtitle = "Upward Trend",
       x = "", # Override defaults for x and y
       y = "Revenue"
     )
@@ -206,4 +207,118 @@ plot(10)
 plot(11)
 plot(12)
 ```
+#Data Acquisition
+```{r}
+library(RSQLite)
+library(dplyr)
+library(httr)
+library(tidyverse) 
+library(rvest)    
+library(xopen)     
+library(jsonlite) 
+library(glue)     
+library(stringi)  
 
+```
+## API reading
+```{r}
+get_pkm_name<-function(ID){
+  url<-glue("https://pokeapi.co/api/v2/pokemon/{ID}/")
+  pokemon<- url%>%GET()%>%.$content %>% 
+    rawToChar() %>% 
+    fromJSON()%>% .[11]%>%.[[1]]%>%
+    enframe( value = "Name")%>%
+    select(Name)
+  pokemon
+}
+pokemon_lst <- map(1:151,get_pkm_name )
+pokemon_tbl <- bind_rows(pokemon_lst)
+pokemon_tbl
+
+```
+## RoseBikeScraping
+```{r}
+url_home          <- "https://www.rosebikes.com"
+html_home         <- read_html(url_home)
+bike_category_tbl <- html_home %>%
+  html_nodes(css = ".main-navigation-category-with-tiles__tile-link")%>%
+  html_attr('href') %>%
+  enframe(name = "position", value = "subdirectory")%>%
+  mutate(
+    url = glue("https://www.rosebikes.com{subdirectory}")
+  )
+
+bike_url<-function(url){
+  html<- read_html(url)
+  bike_category_tbl <- html %>%
+    html_nodes(css = ".catalog-navigation__link")%>%
+    html_attr('href') %>%
+    enframe(name = "position", value = "subdirectory")%>%
+    mutate(
+      url = glue("https://www.rosebikes.com{subdirectory}")
+    )
+  if(is_empty(bike_category_tbl[[1]])){
+    tibble ("url" =url)
+  }
+  else{
+    bike_category_tbl
+  }
+}
+
+bike_url2<-function(url){
+  html<- read_html(url)
+  bike_category_tbl <- html %>%
+    html_nodes(css = ".catalog-category-bikes__button")%>%
+    html_attr('href') %>%
+    enframe(name = "position", value = "subdirectory")%>%
+    mutate(
+      url = glue("https://www.rosebikes.com{subdirectory}")
+    )
+  if(is_empty(bike_category_tbl[[1]])){
+    tibble ("url" =url)
+  }
+  else{
+    bike_category_tbl
+  }
+}
+bike_category_url_vec <- bike_category_tbl %>% 
+  pull(url)
+bike_url_lst <- map(bike_category_url_vec, bike_url)
+bike_url_tbl <- bind_rows(bike_url_lst)
+
+bike_category_url_vec2 <- bike_url_tbl %>% 
+  pull(url)
+bike_url_lst2 <- map(bike_category_url_vec2, bike_url2)
+bike_url_tbl2 <- bind_rows(bike_url_lst2)
+#here im cutting of the Kids bikes because of different layout :)
+bike_url_tbl2<-bike_url_tbl2%>%filter(row_number()== 1:50) 
+
+bike_price<-function(url){
+  html<- read_html(url)
+  price <- html %>%
+    html_nodes(css = ".catalog-category-model__price-current-value")%>%
+    html_text() %>%
+    str_remove(pattern = "\n")%>%
+    str_remove(pattern = "\200")%>%
+    str_remove(pattern = "\n")
+  name <- html %>%
+    html_nodes(css = ".catalog-category-model__title")%>%
+    html_text() %>%
+    str_remove(pattern = "\n")%>%
+    str_remove(pattern = "\200")%>%
+    str_remove(pattern = "\n")
+  tibble(
+    "price"= price,
+    "model"= name,
+  )
+
+}
+
+bike_url_vec <- bike_url_tbl2 %>% 
+  pull(url)
+bike_price_lst <- map(bike_url_vec, bike_price)
+bike_price_tbl <- bind_rows(bike_price_lst)
+bike_price_tbl
+
+
+```
